@@ -1,7 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/myLayoutRoot"
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_margin="1dp"
+            android:padding="4dp">
+
+        <androidx.cardview.widget.CardView
+                android:id="@+id/iconBackground"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginBottom="8dp"
+                android:background="?selectableItemBackground"
+                app:layout_constraintDimensionRatio="1:1"
+                app:cardCornerRadius="8dp">
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/icon"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+
+            />
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/linearLayoutCompat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                app:layout_constraintBottom_toBottomOf="@+id/iconBackground"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/iconBackground"
+                app:layout_constraintTop_toTopOf="@+id/iconBackground">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/myTextViewTitle"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textColor="@color/colors_onBackground"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/myTextViewSubTitle"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lines="1"
+                    android:textColor="@color/colors_outline"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/outline_variant"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

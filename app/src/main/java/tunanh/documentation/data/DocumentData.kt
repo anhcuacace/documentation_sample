@@ -9,5 +9,6 @@ data class DocumentData(
     val name:String,
     val path:String,
     val uri: Uri,
-    val type: DocumentType
+    val type: DocumentType,
+    val dateModifier: Long
 ):Parcelable

@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.DocumentsContract
 import android.provider.Settings
 import android.view.View
@@ -20,7 +22,7 @@ import tunanh.documentation.R
 import java.io.File
 
 object Utils {
-    private val STORAGE_PERMISSION_STORAGE_SCOPE = arrayOf(
+     val STORAGE_PERMISSION_STORAGE_SCOPE = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE
     )
 
@@ -30,6 +32,8 @@ object Utils {
     fun isAndroidR(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
+
+    fun checkPermissionStorage(context: Context):Boolean= allPermissionGrant(context, STORAGE_PERMISSION_STORAGE_SCOPE)
 
     private fun allPermissionGrant(context: Context, intArray: Array<String>): Boolean {
         var isGranted = true
@@ -46,34 +50,33 @@ object Utils {
         return isGranted
     }
 
-    fun showAlertPermissionNotGrant(
-        view: View,
-        activity: Activity,
-        permissions: Array<out String?>
-    ) {
-        if (!hasShowRequestPermissionRationale(activity, *permissions)) {
-            val snackBar = Snackbar.make(
-                view,
-                activity.getString(R.string.goto_settings),
-                Snackbar.LENGTH_LONG
-            )
-            snackBar.setAction(
-                activity.getString(R.string.settings)
-            ) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                val uri = Uri.fromParts("package", activity.packageName, null)
-                intent.data = uri
-                activity.startActivity(intent)
+
+    fun showSnackBarOpenSetting( permissions: Array<out String?>,activity: Activity,view: View) {
+        Handler(Looper.getMainLooper()).post {
+            if (!hasShowRequestPermissionRationale(activity, *permissions)) {
+                val snackBar = Snackbar.make(
+                    view,
+                    activity.getString(R.string.goto_settings),
+                    Snackbar.LENGTH_LONG
+                )
+                snackBar.setAction(
+                    activity.getString(R.string.settings)
+                ) {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", activity.packageName, null)
+                    intent.data = uri
+                    activity.startActivity(intent)
+                }
+                snackBar.show()
+            } else {
+                Toast.makeText(
+                    activity,
+                    activity.getString(R.string.grant_permission),
+                    Toast.LENGTH_SHORT
+                ).show()
+
             }
-            snackBar.show()
-        } else {
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.grant_permission),
-                Toast.LENGTH_SHORT
-            ).show()
-            //activity.finish()
         }
     }
     private fun hasShowRequestPermissionRationale(

@@ -61,6 +61,7 @@ class DocumentLoader private constructor() {
         }
     }
 
+    @Synchronized
     fun getAllDocument(context: Context):List<DocumentData> {
         val list = mutableListOf<DocumentData>()
 
@@ -70,7 +71,8 @@ class DocumentLoader private constructor() {
         val projection = arrayOf(
             MediaStore.MediaColumns.DATA,
             MediaStore.MediaColumns.DISPLAY_NAME,
-            MediaStore.MediaColumns._ID
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DATE_MODIFIED
         )
 
         val fileCollection = if (isAndroidQ()) {
@@ -88,6 +90,7 @@ class DocumentLoader private constructor() {
             val nameColumns= it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
             val pathColumns = it.getColumnIndex(MediaStore.MediaColumns.DATA)
             val idColumn = it.getColumnIndex(MediaStore.MediaColumns._ID)
+            val timeColumn = it.getColumnIndexOrThrow(projection[3])
             while (it.moveToNext()){
                 val name= it.getString(nameColumns)?:"Unknown"
                 val path= it.getString(pathColumns)?:""
@@ -103,7 +106,8 @@ class DocumentLoader private constructor() {
                     else -> DocumentType.Unknown
 
                 }
-                list.add(DocumentData(name,path,ContentUris.withAppendedId(fileCollection,id),type))
+                val time = it.getLong(timeColumn)
+                list.add(DocumentData(name,path,ContentUris.withAppendedId(fileCollection,id),type,time))
             }
         }
         return list
