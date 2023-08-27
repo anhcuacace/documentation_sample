@@ -65,8 +65,16 @@ class DocumentLoader private constructor() {
     fun getAllDocument(context: Context):List<DocumentData> {
         val list = mutableListOf<DocumentData>()
 
-        val selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
-        val mimeTypes = arrayOf("application/msword", "application/pdf", "text/plain","application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+//        val selection = MediaStore.Files.FileColumns.MIME_TYPE + " = ? or "+
+//                MediaStore.Files.FileColumns.MIME_TYPE + " =? or "+
+//                MediaStore.Files.FileColumns.MIME_TYPE + " =? or "+
+//                MediaStore.Files.FileColumns.MIME_TYPE + " =?"
+//        val mimeTypes = arrayOf(
+//            "application/msword",
+//            "application/pdf",
+//            "text/plain"
+//            ,"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+//        )
 
         val projection = arrayOf(
             MediaStore.MediaColumns.DATA,
@@ -85,15 +93,15 @@ class DocumentLoader private constructor() {
             context.contentResolver,
             fileCollection,
             projection,
-            selection,mimeTypes
+            null,null
         )?.use {
-            val nameColumns= it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-            val pathColumns = it.getColumnIndex(MediaStore.MediaColumns.DATA)
-            val idColumn = it.getColumnIndex(MediaStore.MediaColumns._ID)
+            val nameColumns= it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+            val idColumn = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
             val timeColumn = it.getColumnIndexOrThrow(projection[3])
+            val pathColumn=if (!isAndroidQ())it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)else 0
             while (it.moveToNext()){
                 val name= it.getString(nameColumns)?:"Unknown"
-                val path= it.getString(pathColumns)?:""
+                val path= getPathFromCursor(context, it, fileCollection, idColumn, pathColumn)?:""
                 val id=it.getLong(idColumn)
                 val type= when (getMimeType(name)){
                     "application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->
@@ -103,7 +111,9 @@ class DocumentLoader private constructor() {
 
                     "text/plain" -> DocumentType.Txt
 
-                    else -> DocumentType.Unknown
+                    else -> {
+                        continue
+                    }
 
                 }
                 val time = it.getLong(timeColumn)

@@ -6,31 +6,26 @@
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/myLayoutRoot"
             android:layout_width="match_parent"
+            android:background="?selectableItemBackground"
             android:layout_height="78dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:layout_margin="1dp"
             android:padding="4dp">
 
-        <androidx.cardview.widget.CardView
-                android:id="@+id/iconBackground"
+
+        <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/icon"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                android:scaleType="fitCenter"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginBottom="8dp"
-                android:background="?selectableItemBackground"
                 app:layout_constraintDimensionRatio="1:1"
-                app:cardCornerRadius="8dp">
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/icon"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
 
-            />
-        </androidx.cardview.widget.CardView>
+        />
 
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -41,11 +36,11 @@
                 android:gravity="center_vertical"
                 android:orientation="vertical"
                 android:paddingHorizontal="12dp"
-                app:layout_constraintBottom_toBottomOf="@+id/iconBackground"
+                app:layout_constraintBottom_toBottomOf="@+id/icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/iconBackground"
-                app:layout_constraintTop_toTopOf="@+id/iconBackground">
+                app:layout_constraintStart_toEndOf="@+id/icon"
+                app:layout_constraintTop_toTopOf="@+id/icon">
 
             <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/myTextViewTitle"

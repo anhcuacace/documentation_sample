@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
@@ -33,7 +34,13 @@ object Utils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
 
-    fun checkPermissionStorage(context: Context):Boolean= allPermissionGrant(context, STORAGE_PERMISSION_STORAGE_SCOPE)
+    fun isTIRAMISU(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    }
+    fun checkPermissionStorage(context: Context):Boolean= if (isAndroidR()){
+        Environment.isExternalStorageManager()
+    }else
+        allPermissionGrant(context, STORAGE_PERMISSION_STORAGE_SCOPE)
 
     private fun allPermissionGrant(context: Context, intArray: Array<String>): Boolean {
         var isGranted = true

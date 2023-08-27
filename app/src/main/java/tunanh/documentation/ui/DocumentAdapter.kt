@@ -2,7 +2,6 @@ package tunanh.documentation.ui
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.OnReceiveContentListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import tunanh.documentation.R
@@ -29,7 +28,7 @@ class DocumentAdapter(private val listener: DocumentAdapterCallBack):RecyclerVie
                     }
                 )
                 myTextViewTitle.text=data.name
-                myTextViewSubTitle.text = data.dateModifier.getTimeFormat(AppConstant.FORMAT_TIME_INFO)
+                myTextViewSubTitle.text = (data.dateModifier*1000L).getTimeFormat(AppConstant.FORMAT_TIME_INFO)
                 root.setOnClickListener{
                     listener.onCLick(data)
                 }
