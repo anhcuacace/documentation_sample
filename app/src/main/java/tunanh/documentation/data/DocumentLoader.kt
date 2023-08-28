@@ -6,9 +6,14 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
+import android.webkit.MimeTypeMap
+import tunanh.documentation.util.Utils
 import tunanh.documentation.util.Utils.isAndroidQ
 import tunanh.documentation.util.storage.PathUtils
+import java.io.File
+import java.util.*
 
 class DocumentLoader private constructor() {
 
@@ -23,12 +28,12 @@ class DocumentLoader private constructor() {
     fun createCursor(
         contentResolver: ContentResolver,
         collection: Uri,
-        projection: Array<String>,
+        projection: Array<String>?,
         selection: String? = null,
         selectionArgs: Array<String>? = null,
     ): Cursor? = when {
         isAndroidQ() -> {
-            contentResolver.query(collection, null, selection, selectionArgs, "date_added DESC")
+            contentResolver.query(collection, null, null, null, "date_added DESC")
         }
 
         else -> {
@@ -40,6 +45,32 @@ class DocumentLoader private constructor() {
                 "date_added DESC"
             )
         }
+    }
+    fun doc(file: File=Environment.getExternalStorageDirectory()): ArrayList<File> {
+        val fileArrayList = ArrayList<File>()
+        val files = file.listFiles()
+        if (files != null) {
+            for (singleFile in files) {
+                if (singleFile.isDirectory() && !singleFile.isHidden()) {
+                    fileArrayList.addAll(doc(singleFile))
+                } else {
+                    if (!singleFile.isHidden() && singleFile.getName().lowercase(Locale.getDefault())
+                            .endsWith(".doc") || singleFile.getName().lowercase(
+                            Locale.getDefault()
+                        ).endsWith(".docx") || singleFile.getName().lowercase(Locale.getDefault())
+                            .endsWith(".xls") || singleFile.getName().lowercase(
+                            Locale.getDefault()
+                        ).endsWith(".xlsx") || singleFile.getName().lowercase(Locale.getDefault())
+                            .endsWith(".txt") || singleFile.getName().lowercase(
+                            Locale.getDefault()
+                        ).endsWith(".ppt") || singleFile.getName().lowercase(Locale.getDefault()).endsWith(".pdf")
+                    ) {
+                        fileArrayList.add(singleFile)
+                    }
+                }
+            }
+        }
+        return fileArrayList
     }
 
     fun getPathFromCursor(
@@ -64,17 +95,43 @@ class DocumentLoader private constructor() {
     @Synchronized
     fun getAllDocument(context: Context):List<DocumentData> {
         val list = mutableListOf<DocumentData>()
+        if (!Utils.isAndroidR()){
+            return doc().flatMap {
+                val list= mutableListOf<DocumentData>()
+                val name= it.name
+                val dateModifier=System.currentTimeMillis()
 
-//        val selection = MediaStore.Files.FileColumns.MIME_TYPE + " = ? or "+
-//                MediaStore.Files.FileColumns.MIME_TYPE + " =? or "+
-//                MediaStore.Files.FileColumns.MIME_TYPE + " =? or "+
-//                MediaStore.Files.FileColumns.MIME_TYPE + " =?"
+                 val data=DocumentData(name,it.absolutePath,Uri.fromFile(it), when (getMimeType(name)){
+                "application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->
+                    DocumentType.MSWord
+
+                "application/pdf" -> DocumentType.PDF
+
+                "text/plain" -> DocumentType.Txt
+
+                else -> {
+                    DocumentType.Unknown
+                }
+            },dateModifier)
+                list.add(data)
+                list
+            }
+        }
+
+        val selection = MediaStore.Files.FileColumns.MIME_TYPE + " = ? or "+
+                MediaStore.Files.FileColumns.MIME_TYPE + " = ? or "+
+                MediaStore.Files.FileColumns.MIME_TYPE + " = ? or "+
+                MediaStore.Files.FileColumns.MIME_TYPE + " = ?"
 //        val mimeTypes = arrayOf(
 //            "application/msword",
 //            "application/pdf",
 //            "text/plain"
 //            ,"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 //        )
+        val mimeTypes= arrayOf(MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf").orEmpty(),
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension("doc").orEmpty(),
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension("txt").orEmpty(),
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension("docx").orEmpty())
 
         val projection = arrayOf(
             MediaStore.MediaColumns.DATA,
@@ -93,7 +150,7 @@ class DocumentLoader private constructor() {
             context.contentResolver,
             fileCollection,
             projection,
-            null,null
+            selection,mimeTypes
         )?.use {
             val nameColumns= it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
             val idColumn = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
@@ -103,7 +160,7 @@ class DocumentLoader private constructor() {
                 val name= it.getString(nameColumns)?:"Unknown"
                 val path= getPathFromCursor(context, it, fileCollection, idColumn, pathColumn)?:""
                 val id=it.getLong(idColumn)
-                val type= when (getMimeType(name)){
+                val type= when (it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))){
                     "application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->
                         DocumentType.MSWord
 
@@ -119,6 +176,7 @@ class DocumentLoader private constructor() {
                 val time = it.getLong(timeColumn)
                 list.add(DocumentData(name,path,ContentUris.withAppendedId(fileCollection,id),type,time))
             }
+            it.close()
         }
         return list
     }

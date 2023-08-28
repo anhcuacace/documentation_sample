@@ -64,9 +64,7 @@ class MainActivity : AppCompatActivity(), DocumentAdapter.DocumentAdapterCallBac
                     intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
                     startActivity(intent)
                 }
-            }
-
-            else{
+            } else{
                 permissionRequest.launch(Utils.STORAGE_PERMISSION_STORAGE_SCOPE)
             }
 
