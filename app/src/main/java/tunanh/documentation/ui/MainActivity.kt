@@ -92,7 +92,8 @@ class MainActivity : AppCompatActivity(), DocumentAdapter.DocumentAdapterCallBac
         binding.layout.isRefreshing=true
         lifecycleScope.launch(Dispatchers.Default){
             try {
-                documentData.postValue(DocumentLoader.getInstant().getAllDocument(this@MainActivity))
+
+                documentData.postValue(DocumentLoader.getInstant().getAllDocuments(this@MainActivity))
             }catch (e:Exception){
                 Log.e(javaClass.name,e.message,e)
                 Handler(Looper.getMainLooper()).post {
