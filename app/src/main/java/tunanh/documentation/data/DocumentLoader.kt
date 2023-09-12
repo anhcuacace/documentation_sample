@@ -110,42 +110,45 @@ class DocumentLoader private constructor() {
             arrayOf("_id", "_data", "date_added", "media_type", "mime_type", "title", "_size","_display_name","date_modified"),
             str,
             this.docType,
-            "date_added DESC"
+            "date_modified DESC"
         )?.use {
+            if (it.moveToFirst()){
             val nameColumns = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
             val idColumn = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
             val timeColumn = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
             val pathColumn = if (!isAndroidQ()) it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA) else 0
-            while (it.moveToNext()) {
-                val name = it.getString(nameColumns) ?: "Unknown"
-                val path =
-                    getPathFromCursor(context, it, MediaStore.Files.getContentUri("external"), idColumn, pathColumn)
-                        ?: ""
-                val id = it.getLong(idColumn)
-                val type = when (it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))) {
-                    "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->
-                        DocumentType.MSWord
+                do{
+                    val name = it.getString(nameColumns) ?: "Unknown"
+                    val path =
+                        getPathFromCursor(context, it, MediaStore.Files.getContentUri("external"), idColumn, pathColumn)
+                            ?: ""
+                    val id = it.getLong(idColumn)
+                    val type = when (it.getString(it.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))) {
+                        "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->
+                            DocumentType.MSWord
 
-                    "application/pdf" -> DocumentType.PDF
+                        "application/pdf" -> DocumentType.PDF
 
-                    "text/plain" -> DocumentType.Txt
+                        "text/plain" -> DocumentType.Txt
 
-                    else -> {
-                        continue
+                        else -> {
+                            continue
+                        }
+
                     }
-
-                }
-                val time = it.getLong(timeColumn)
-                list.add(
-                    DocumentData(
-                        name,
-                        path,
-                        ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id),
-                        type,
-                        time
+                    val time = it.getLong(timeColumn)
+                    list.add(
+                        DocumentData(
+                            name,
+                            path,
+                            ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id),
+                            type,
+                            time
+                        )
                     )
-                )
+                }while (it.moveToNext())
             }
+
             it.close()
         }
         return list

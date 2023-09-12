@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="setting_items">
+        <item>Maximum count of recently files(1~20)</item>
+    </array>
+</resources>
